@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { FaEyeSlash, FaEye, FaGithub } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
 import { IconType } from "react-icons";
-
+import { redirect, useNavigate } from "react-router-dom";
 import { supabase } from "../client";
 
 // Fixed IconWrapper component
@@ -17,11 +17,16 @@ const IconWrapper: React.FC<{ icon: IconType; size?: number; className?: string 
     className 
   });
 };
+interface LoginProps {
+    setToken: (token: any) => void; // Replace `any` with a specific type if you know the structure of the token
+  }
 
-function Login() {
+function Login({setToken} :LoginProps) {
+    const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
-
+  const [error, setError] = useState("");
   const togglePasswordVisibility = () => {
+    
     setShowPassword(!showPassword);
   };
 
@@ -39,11 +44,40 @@ function Login() {
     });
   }
 
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     console.log(formData); // Implement login logic here
+    try {
+        const { data, error } = await supabase.auth.signInWithPassword({
+            email: formData.email,
+            password: formData.password,
+          })
+          
+          if(error) throw error
+          console.log(data)
+          setToken(data)
+          navigate("/MovieHub")
+        
+    } catch (err) {
+        console.error("Unexpected error:", err);
+        setError("An unexpected error occurred.");
+    }
   }
-  
+  async function handleGoogleSignIn(event: React.MouseEvent<HTMLButtonElement>) {
+    try {
+        const {data,error} = await supabase.auth.signInWithOAuth({
+            provider:'google',
+            options:{
+                redirectTo: window.location.origin + '/'
+            }
+        })
+    } catch (err) {
+        console.error("Google sign-in error: ",err)
+        setError("Failed to sign in with Google")
+        
+    }
+  }
+ 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-50">
       <div className="w-full max-w-md p-4">
@@ -144,6 +178,7 @@ function Login() {
             <div className="flex gap-4">
               <button
                 type="button"
+                onClick={handleGoogleSignIn}
                 className="w-full flex items-center justify-center gap-2 py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white hover:bg-gray-50 text-gray-700"
               >
                 <IconWrapper icon={FcGoogle} className="w-5 h-5" />
