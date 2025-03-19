@@ -234,13 +234,7 @@ function SignupPage() {
                 <IconWrapper icon={FcGoogle} className="w-5 h-5" />
                 <span className="text-sm font-medium">Google</span>
               </button>
-              <button
-                type="button"
-                className="w-full flex items-center justify-center gap-2 py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white hover:bg-gray-50 text-gray-700"
-              >
-                <IconWrapper icon={FaGithub} className="w-5 h-5" />
-                <span className="text-sm font-medium">GitHub</span>
-              </button>
+             
             </div>
           </form>
         </div>
